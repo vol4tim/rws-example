@@ -9,12 +9,12 @@
         "LaunchParameter": "bool"
       }
     },
-    "subscription": "4GzMLepDF5nKTWDM6XpB3CrBcFmwgazcVFAD3ZBNAjKT6hQJ",
-    "sender": "//Alice",
+    "subscription": null,
+    "sender": null,
     "timeout": 10000
   },
   "pubsub": {
-    "enable": false,
+    "enable": true,
     "device_id": "DEVICE_ID",
     "topic": "airalab.lighthouse.5.robonomics.eth",
     "timeout": 15000

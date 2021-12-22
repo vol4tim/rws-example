@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+if [ ! -d rws-example/ ]
+then
+  git clone https://github.com/vol4tim/rws-example.git
+fi
+
+cd rws-example
+
 printf '%*s' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 
 if ! [ -x "$(command -v node)" ]; then
@@ -44,6 +51,13 @@ fi
 if [ ! -d dist/ ]
 then
   npm run build
+fi
+
+DEVICE_ID=""
+device_id="$(node -pe "require('./config.json').pubsub.device_id")"
+if [[ $device_id != $DEVICE_ID && $DEVICE_ID != "" ]]
+then
+  sed -i "s/\"$device_id\"/\"$DEVICE_ID\"/" config.json
 fi
 
 printf '%*s' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
