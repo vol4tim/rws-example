@@ -1,0 +1,22 @@
+{
+  "polkadot": {
+    "enable": true,
+    "chain": {
+      "endpoint": "ws://127.0.0.1:9944",
+      "types": {
+        "Record": "Vec<u8>",
+        "Parameter": "bool",
+        "LaunchParameter": "bool"
+      }
+    },
+    "subscription": "4GzMLepDF5nKTWDM6XpB3CrBcFmwgazcVFAD3ZBNAjKT6hQJ",
+    "sender": "//Alice",
+    "timeout": 10000
+  },
+  "pubsub": {
+    "enable": false,
+    "device_id": "DEVICE_ID",
+    "topic": "airalab.lighthouse.5.robonomics.eth",
+    "timeout": 15000
+  }
+}
