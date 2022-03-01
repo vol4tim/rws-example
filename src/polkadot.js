@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import inquirer from "inquirer";
-import { Robonomics, AccountManager } from "./robonomics-substrate";
+import { Robonomics, AccountManager } from "robonomics-interface";
+import { Keyring } from "@polkadot/keyring";
 import config from "../config.json";
 
 async function checkConfig() {
@@ -59,61 +60,73 @@ async function checkConfig() {
 
 export default async function () {
   await checkConfig();
-  const robonomics = new Robonomics(config.polkadot.chain);
-  robonomics.setAccountManager(new AccountManager());
+  const robonomics = new Robonomics({
+    endpoint: config.polkadot.chain.endpoint,
+    runImmediate: true,
+  });
+  robonomics.setAccountManager(
+    new AccountManager(new Keyring({ type: "sr25519" }))
+  );
   robonomics.onReady(() => {
     console.log(new Date().toLocaleString(), "[Robonomics]", "Ready");
-    robonomics.accountManager.setAccounts([config.polkadot.sender]);
-    robonomics.accountManager.onReady(() => {
-      console.log(
-        new Date().toLocaleString(),
-        "[Robonomics]",
-        `Device ${robonomics.accountManager.account.address}`
-      );
 
-      const worker = () => {
-        const logFromDevice = `Random: ${Math.random().toFixed(4)}`;
-        const call = robonomics.datalog.write(logFromDevice);
-        const tx = robonomics.rws.call(config.polkadot.subscription, call);
-        robonomics.accountManager.signAndSend(tx).then((r) => {
+    robonomics.accountManager.keyring.addFromUri(config.polkadot.sender);
+    const accounts = robonomics.accountManager.getAccounts();
+    robonomics.accountManager.selectAccountByAddress(accounts[0].address);
+
+    console.log(
+      new Date().toLocaleString(),
+      "[Robonomics]",
+      `Device ${robonomics.accountManager.account.address}`
+    );
+
+    const worker = () => {
+      const logFromDevice = `Random: ${Math.random().toFixed(4)}`;
+      const call = robonomics.datalog.write(logFromDevice);
+      const tx = robonomics.rws.call(config.polkadot.subscription, call);
+      robonomics.accountManager
+        .signAndSend(tx)
+        .then((r) => {
           console.log(
             new Date().toLocaleString(),
             "[Robonomics]",
             `https://robonomics.subscan.io/extrinsic/${r.blockNumber}-${r.txIndex}`
           );
+        })
+        .catch((error) => {
+          console.log(new Date().toLocaleString(), "[Error]", error.message);
         });
-      };
+    };
 
-      let interval = false;
-      robonomics.launch.on({}, (events) => {
-        events = events.filter((item) => {
-          return item.robot === robonomics.accountManager.account.address;
-        });
-        for (const event of events) {
+    let interval = false;
+    robonomics.launch.on({}, (events) => {
+      events = events.filter((item) => {
+        return item.robot === robonomics.accountManager.account.address;
+      });
+      for (const event of events) {
+        console.log(
+          new Date().toLocaleString(),
+          "[Robonomics]",
+          `New event launch from ${event.account} | parameter ${event.parameter}`
+        );
+        if (event.parameter) {
           console.log(
             new Date().toLocaleString(),
             "[Robonomics]",
-            `New event launch from ${event.account} | parameter ${event.parameter}`
+            "Run device"
           );
-          if (event.parameter) {
-            console.log(
-              new Date().toLocaleString(),
-              "[Robonomics]",
-              "Run device"
-            );
-            clearInterval(interval);
-            worker();
-            interval = setInterval(worker, config.polkadot.timeout);
-          } else {
-            console.log(
-              new Date().toLocaleString(),
-              "[Robonomics]",
-              "Stop device"
-            );
-            clearInterval(interval);
-          }
+          clearInterval(interval);
+          worker();
+          interval = setInterval(worker, config.polkadot.timeout);
+        } else {
+          console.log(
+            new Date().toLocaleString(),
+            "[Robonomics]",
+            "Stop device"
+          );
+          clearInterval(interval);
         }
-      });
+      }
     });
   });
 }

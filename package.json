@@ -28,7 +28,7 @@
     "prettier": "^2.0.5"
   },
   "dependencies": {
-    "@polkadot/api": "^6.2.1",
+    "@polkadot/api": "^6.12.1",
     "core-js": "^3.6.5",
     "inquirer": "^8.2.0",
     "libp2p": "^0.29.2",
@@ -39,6 +39,7 @@
     "libp2p-tcp": "^0.15.1",
     "libp2p-webrtc-star": "^0.20.1",
     "libp2p-websockets": "^0.14.0",
-    "regenerator-runtime": "^0.13.7"
+    "regenerator-runtime": "^0.13.7",
+    "robonomics-interface": "^0.1.1"
   }
 }

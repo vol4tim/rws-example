@@ -3,11 +3,7 @@
     "enable": true,
     "chain": {
       "endpoint": "ws://127.0.0.1:9944",
-      "types": {
-        "Record": "Vec<u8>",
-        "Parameter": "bool",
-        "LaunchParameter": "bool"
-      }
+      "types": {}
     },
     "subscription": null,
     "sender": null,
